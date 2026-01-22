@@ -1,45 +1,93 @@
 <?php
-
 namespace App\Http\Controllers;
 
-use App\Services\OpenAIService;
-use Faker\Core\File;
 use Illuminate\Http\Request;
-use Symfony\Component\Process\Exception\ProcessFailedException;
-use Illuminate\Support\Facades\Storage;
 use Smalot\PdfParser\Parser;
-use Symfony\Component\Process\Process;
+use Illuminate\Support\Facades\Storage;
+use Orhanerday\OpenAi\OpenAi;
 
 class ControllerPDF extends Controller
 {
-    protected $openAIService;
-    public function __construct(OpenAIService $openAIService) {
-        $this->openAIService = $openAIService;
-    }
-    public function getResponse(Request $request)
+    public function processPdf(Request $request)
     {
-        $request->validate([
-            'prompt' => 'required|string',
-        ]);
+        // Store the uploaded file
+        $path = $request->file('pdf_file')->store('pdfs');
 
-        $prompt = $request->input('prompt');
-        $response = $this->openAIService->generateResponse($prompt);
+        // Parse the PDF
+        $parser = new Parser();
+        $pdf = $parser->parseFile(storage_path('app/' . $path));
+        $text = $pdf->getText();
 
-        return response()->json(['response' => $response]);
+        // Extract relevant data from the text using OpenAI API
+        $data = $this->extractDataWithOpenAI($text);
+
+        // Convert data to JSON (optional)
+        $json = json_encode($data, JSON_PRETTY_PRINT);
+
+        // Save the JSON to a file (optional)
+        $jsonPath = 'json/' . pathinfo($path, PATHINFO_FILENAME) . '.json';
+        Storage::put($jsonPath, $json);
+
+        // Redirect to the 'instrumentacion' route with the data
+        return redirect()->route('instrumentacion')->with('data', $data);
     }
 
-    public function extractText(Request $request)
+    protected function extractDataWithOpenAI($text)
     {
-        $request->validate([
-            'file' => 'required|file|mimes:txt,pdf,doc,docx',
-        ]);
+        // Create a new OpenAI client instance
+        $openai = new OpenAi(env('OPENAI_API_KEY'));
 
-        $path = $request->file('file')->store('uploads');
+        // Create the payload for the API request
+        $payload = [
+            'model' => 'gpt-3.5-turbo',
+            'messages' => [
+                [
+                    'role' => 'system',
+                    'content' => 'You are a data extraction assistant.'
+                ],
+                [
+                    'role' => 'user',
+                    'content' => $this->generatePrompt($text)
+                ]
+            ],
+            'max_tokens' => 1500,
+        ];
 
-        $fileContent = Storage::get($path);
-        $response = $this->openAIService->generateResponse($fileContent);
+        // Send the API request
+        $response = $openai->chat($payload);
 
-        return response()->json(['response' => $response]);
+        // Decode the API response
+        $responseData = json_decode($response, true);
+
+        // Extract the content from the response
+        $content = $responseData['choices'][0]['message']['content'];
+
+        return json_decode($content, true);
     }
 
+    protected function generatePrompt($text)
+    {
+        return "
+        Extrae la siguiente información de este texto de un documento PDF sobre una asignatura:
+        - Nombre de la asignatura
+        - Clave de la asignatura
+        - SATCA
+        - Carrera
+        - Competencias a desarrollar
+        - Temario con números, temas y subtemas
+
+        Texto del PDF:
+        $text
+
+        Formato de respuesta esperado:
+        {
+            \"nombre\": \"\",
+            \"clave\": \"\",
+            \"satca\": \"\",
+            \"carrera\": \"\",
+            \"competencias\": [],
+            \"temario\": []
+        }
+        ";
+    }
 }
