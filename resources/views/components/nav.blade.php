@@ -1,65 +1,95 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Grupos</title>
     @vite('resources/css/app.css')
 </head>
-<body class="bg-slate-700 pb-1">
-   
 
-<nav class="bg-white dark:bg-gray-900 fixed w-full z-20 top-0 start-0 border-b border-gray-200 dark:border-gray-600">
-    <div class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
-    <a href="#" class="flex items-center space-x-3 rtl:space-x-reverse">
-        <img src="https://flowbite.com/docs/images/logo.svg" class="h-8" alt="Flowbite Logo">
-        <span class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">Bienvenido</span>
-    </a>
-    
-    <div class="flex md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse">
-        <button onclick="input_file_modal.showModal()" type="button" class="text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-4 py-2 text-center dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800 mr-5">Agregar grupo</button>
-        <button type="button" class="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-4 py-2 text-center dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800">Cerrar sesión</button>
-        <button data-collapse-toggle="navbar-sticky" type="button" class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600" aria-controls="navbar-sticky" aria-expanded="false">
-          <span class="sr-only">Abrir menu</span>
-          <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 17 14">
-              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 1h15M1 7h15M1 13h15"/>
-          </svg>
-      </button>
+<body class="bg-base-300 min-h-screen pb-10">
+
+    <div class="navbar bg-base-100/90 backdrop-blur-md shadow-sm fixed top-0 z-50">
+        <div class="container mx-auto">
+            <div class="flex-1">
+                <a href="{{ route('home') }}" class="btn btn-ghost text-xl gap-2 normal-case">
+                    <img src="https://flowbite.com/docs/images/logo.svg" class="h-8 md:h-9" alt="Logo">
+                    <span class="font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">
+                        Gestión Proyectos
+                    </span>
+                </a>
+            </div>
+            <div class="flex-none flex items-center gap-3">
+                @if (auth()->check())
+                    <div class="hidden md:flex items-center gap-2">
+                        <a href="{{ route('home') }}" class="btn btn-ghost btn-sm">Inicio</a>
+                        <button onclick="input_file_modal.showModal()" class="btn btn-primary btn-sm gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+                            </svg>
+                            Nuevo Grupo
+                        </button>
+                    </div>
+
+                    {{-- User Profile Dropdown --}}
+                    <div class="dropdown dropdown-end">
+                        <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar placeholder border border-base-300">
+                            <div class="bg-neutral text-neutral-content rounded-full w-10">
+                                <span class="text-xs">{{ substr(auth()->user()->name, 0, 2) }}</span>
+                            </div>
+                        </div>
+                        <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow-lg bg-base-100 rounded-box w-64 border border-base-200">
+                            <li class="menu-title px-4 py-2">
+                                <span class="text-xs opacity-50 block">Conectado como</span>
+                                <span class="font-bold text-base-content block truncate">{{ auth()->user()->name }}</span>
+                            </li>
+                            <div class="divider my-0"></div>
+                            <li class="md:hidden"><a href="{{ route('home') }}">Inicio</a></li>
+                            <li class="md:hidden"><button onclick="input_file_modal.showModal()">Nuevo Grupo</button></li>
+                            <li>
+                                <a href="{{ route('logout') }}" class="text-error hover:bg-error/10">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                    </svg>
+                                    Cerrar sesión
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                @else
+                    <a href="{{ route('login') }}" class="btn btn-primary btn-sm">Iniciar Sesión</a>
+                @endif
+            </div>
+        </div>
     </div>
-    <div class="items-center justify-between hidden w-full md:flex md:w-auto md:order-1" id="navbar-sticky">
-      <ul class="flex flex-col p-4 md:p-0 mt-4 font-medium border border-gray-100 rounded-lg bg-gray-50 md:space-x-8 rtl:space-x-reverse md:flex-row md:mt-0 md:border-0 md:bg-white dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700">
-        
-        <li>
-          <a href="#" class="block py-2 px-3 text-white bg-blue-700 rounded md:bg-transparent md:text-blue-700 md:p-0 md:dark:text-blue-500" aria-current="page">Inicio</a>
-        </li>
-        <li>
-            
-        </li>
-      </ul>
-    </div>
-    </div>
-  </nav>
-  
-  <main>
-    @yield('content')
-  </main>
-      
+
+    <main class="pt-20 container mx-auto px-4">
+        @yield('content')
+    </main>
+
+    {{-- Modal for adding group --}}
+    <dialog id="input_file_modal" class="modal">
+        <div class="modal-box">
+            <form method="dialog">
+                <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+            </form>
+            <h3 class="font-bold text-lg mb-4">Subir Archivo</h3>
+            <p class="mb-4">Seleccione el temario de la materia</p>
+            <form action="/grupos/" method="POST" class="flex flex-col gap-4" enctype="multipart/form-data">
+                @csrf
+                <input name="pdf_file" accept=".pdf" type="file"
+                    class="file-input file-input-bordered file-input-primary w-full" />
+                <button class="btn btn-primary w-full">Subir temario</button>
+            </form>
+        </div>
+        <form method="dialog" class="modal-backdrop">
+            <button>close</button>
+        </form>
+    </dialog>
+
 </body>
-
-<dialog id="input_file_modal" class="modal">
-    <div class="modal-box">
-      <form method="dialog">
-        <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
-      </form>
-      <h3 class="font-bold text-lg">Subir Archivo</h3>
-      <p class="py-4">Seleccione el temario de la materia</p>
-      <form action="/grupos/" method="POST" class="flex flex-col items-center gap-2" enctype="multipart/form-data">
-        @csrf
-        <input name="pdf_file" accept=".pdf" type="file" class="file-input file-input-bordered file-input-info w-full max-w-xs" />
-        <button class="bg-green-500 hover:bg-green-600 text-white py-2 px-5 rounded-md">Subir temario</button>
-      </form>
-    </div>
-  </dialog>
 
 </html>

@@ -1,26 +1,42 @@
 @extends('components.nav')
 @section('content')
-<div class="m-5 grid xl:grid-cols-4 gap-9 align-middle content-center md:grid-cols-2 sm:grid-cols-1 pt-24">
-    @if (session('message'))
-    <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
-        {{ session('message') }}
-    </div>
-@endif
+    <div class="container mx-auto p-4">
+        <h1 class="text-3xl font-bold mb-6 text-base-content">Mis Grupos</h1>
+        {{-- Alerts Section --}}
+        @if (session('message'))
+            <div role="alert" class="alert alert-success mb-5">
+                <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>{{ session('message') }}</span>
+            </div>
+        @endif
 
-@if (session('error'))
-    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-        {{ session('error') }}
-    </div>
-@endif
-    @for ($i = 0; $i < 10; $i++)
-        <div class="bg-slate-800 hover:bg-slate-600 rounded-md p-5 text-white border-l-8 border-l-blue-500 hover:border-blue-600">
-            <p class="font-bold text-xl truncate  ">Grupo Materiadddddddddddddddddddddddddddd</p>
-            <p class="my-2">Clave</p>
-            <p class="">Créditos: 2-2-4</p>
-            <a href="#" class="btn bg-blue-500 hover:bg-blue-600 text-white text-center mt-3 rounded-md  cursor-pointer align-middle w-full hover:underline">Ir al grupo</a>
+        @if (session('error'))
+            <div role="alert" class="alert alert-error mb-5">
+                <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>{{ session('error') }}</span>
+            </div>
+        @endif
+
+        {{-- Grid Section --}}
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+            @foreach ($grupos as $grupo)
+                <div class="card bg-base-100 shadow-xl border-l-8 border-primary hover:border-l-secondary transition-colors duration-300">
+                    <div class="card-body">
+                        <h2 class="card-title truncate" title="{{ $grupo->nombre }}">
+                            {{ $grupo->nombre }}
+                        </h2>
+                        <p class="text-sm">Clave: <span class="font-bold border px-1 rounded">{{ $grupo->clave }}</span></p>
+                        <p class="text-sm">Créditos: <span class="badge badge-neutral">{{ $grupo->creditos }}</span></p>
+                        <div class="card-actions justify-end mt-4">
+                            <a href="{{ route('grupo', ['id' =>  $grupo->id_grupo ]) }}" class="btn btn-primary w-full">
+                                Ir al grupo
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            @endforeach
         </div>
-    @endfor
-
-    
-</div>
+    </div>
 @endsection
+
+
